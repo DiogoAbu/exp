@@ -1,0 +1,73 @@
+{
+  "name": "exp",
+  "version": "0.0.0",
+  "description": "",
+  "license": "ISC",
+  "main": "dist",
+  "scripts": {
+    "start": "node -r ts-node/register/transpile-only -r tsconfig-paths/register ./dist",
+    "build": "tsc",
+    "dev": "ts-node-dev -r tsconfig-paths/register --respawn --transpileOnly src",
+    "test": "echo \"No test specified\" && exit 0",
+    "eslint": "eslint . --ext .ts,.tsx,.js --max-warnings 0 --config ./.eslintrc",
+    "prettier": "prettier **/*.json --config ./.prettierrc",
+    "lint": "yarn eslint && yarn prettier",
+    "lint-fix": "yarn eslint --fix && yarn prettier --write",
+    "fix-lockfile": "node ./scripts/fix-lockfile.js",
+    "postinstall": "patch-package"
+  },
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
+      "pre-commit": "yarn fix-lockfile && lint-staged && yarn test --forceExit --silent --onlyChanged",
+      "post-commit": "git update-index --again",
+      "pre-push": "git fetch --prune origin \"+refs/tags/*:refs/tags/*\""
+    }
+  },
+  "lint-staged": {
+    "*.{j,t}s{,x}": "eslint --config ./.eslintrc --cache --fix",
+    "*.json": "prettier --config ./.prettierrc --write"
+  },
+  "dependencies": {
+    "patch-package": "^6.2.2",
+    "postinstall-postinstall": "^2.1.0",
+    "ts-node-dev": "^1.0.0-pre.44",
+    "tsconfig-paths": "^3.9.0"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^8.3.5",
+    "@commitlint/config-conventional": "^8.3.4",
+    "@semantic-release/exec": "^5.0.0",
+    "@semantic-release/git": "^9.0.0",
+    "@typescript-eslint/eslint-plugin": "^2.33.0",
+    "@typescript-eslint/parser": "^2.33.0",
+    "babel-eslint": "^10.1.0",
+    "eslint": "^7.0.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-import-resolver-babel-module": "^5.1.2",
+    "eslint-import-resolver-typescript": "^2.0.0",
+    "eslint-plugin-eslint-comments": "^3.1.2",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-jest": "^23.11.0",
+    "eslint-plugin-prettier": "^3.1.3",
+    "eslint-plugin-simple-import-sort": "^5.0.3",
+    "eslint-plugin-unused-imports": "^0.1.3",
+    "husky": "^4.2.5",
+    "lint-staged": "^10.2.2",
+    "prettier": "^2.0.5",
+    "semantic-release": "^17.0.7",
+    "typescript": "^3.9.2"
+  },
+  "engines": {
+    "node": "12.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DiogoAbu/exp.git"
+  },
+  "author": "Diogo Silva <diogodeazevedosilva@gmail.com>",
+  "bugs": {
+    "url": "https://github.com/DiogoAbu/exp/issues"
+  },
+  "homepage": "https://github.com/DiogoAbu/exp#readme"
+}
