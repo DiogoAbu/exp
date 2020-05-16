@@ -14,14 +14,24 @@
         "preset": "conventionalcommits"
       }
     ],
-    "@semantic-release/release-notes-generator",
+    [
+      "@semantic-release/release-notes-generator",
+      {
+        "preset": "conventionalcommits"
+      }
+    ],
     [
       "@semantic-release/exec",
       {
         "prepareCmd": "yarn version --new-version ${nextRelease.version} --no-git-tag-version --allow-same-version"
       }
     ],
-    "@semantic-release/github",
+    [
+      "@semantic-release/github",
+      {
+        "githubUrl": "https://api.github.com"
+      }
+    ],
     [
       "@semantic-release/git",
       {
