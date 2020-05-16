@@ -12,3 +12,5 @@ git push --set-upstream origin beta
 git checkout -b develop
 git push --set-upstream origin develop
 ```
+
+**First release must happen on `master`**
