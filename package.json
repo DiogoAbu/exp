@@ -8,6 +8,7 @@
     "start": "node -r ts-node/register/transpile-only -r tsconfig-paths/register ./dist",
     "build": "tsc",
     "dev": "ts-node-dev -r tsconfig-paths/register --respawn --transpile-only src",
+    "typecheck": "tsc --noEmit",
     "test": "echo \"No test specified\" && exit 0",
     "eslint": "eslint . --ext .ts,.tsx,.js,.jsx --max-warnings 0 --config ./.eslintrc",
     "prettier": "prettier .releaserc.json \".vscode/**/*.json\" \"**/*.json\" --config ./.prettierrc --check",
