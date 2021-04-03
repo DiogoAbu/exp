@@ -20,4 +20,17 @@ node_modules/**
 **/node_modules/
 **/node_modules/**
 
+templates/
+templates/**
+
 generated/
+generated/**
+
+android/app/.cxx
+
+!.vscode/
+!.vscode/**
+!.eslintrc.js
+!.prettierrc.js
+!.commitlintrc.js
+!.releaserc.json
