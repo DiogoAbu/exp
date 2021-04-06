@@ -61,10 +61,10 @@ index 1f16962..4dda4fe 100644
        '@semantic-release/commit-analyzer',
        '@semantic-release/release-notes-generator',
 diff --git a/node_modules/semantic-release/lib/git.js b/node_modules/semantic-release/lib/git.js
-index 8aaf884..cab69c7 100644
+index 8aaf884..65a69ff 100644
 --- a/node_modules/semantic-release/lib/git.js
 +++ b/node_modules/semantic-release/lib/git.js
-@@ -216,12 +216,25 @@ async function verifyAuth(repositoryUrl, branch, execaOptions) {
+@@ -216,12 +216,26 @@ async function verifyAuth(repositoryUrl, branch, execaOptions) {
   *
   * @param {String} tagName The name of the tag.
   * @param {String} ref The Git reference to tag.
@@ -78,14 +78,15 @@ index 8aaf884..cab69c7 100644
 -async function tag(tagName, ref, execaOptions) {
 -  await execa('git', ['tag', tagName, ref], execaOptions);
 +async function tag(tagName, ref, tagAnnotate, tagSign, tagMessage, execaOptions) {
++  const gitTagSign = (await execa('git', ['config', '--get', 'tag.gpgsign'], execaOptions)).stdout == 'true';
 +  const args = ['tag', tagName, ref];
-+  if (tagAnnotate && !tagSign) {
++  if (tagAnnotate && !tagSign && !gitTagSign) {
 +    args.push('-m');
 +  }
-+  if (tagSign && !tagAnnotate) {
++  if (tagSign || gitTagSign) {
 +    args.push('-s');
 +  }
-+  if (tagAnnotate || tagSign) {
++  if (tagAnnotate || tagSign || gitTagSign) {
 +    args.push(`-m ${tagMessage}`);
 +  }
 +  await execa('git', args, execaOptions);
