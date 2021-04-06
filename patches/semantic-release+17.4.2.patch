@@ -1,13 +1,88 @@
+diff --git a/node_modules/semantic-release/cli.js b/node_modules/semantic-release/cli.js
+index 9040236..4e43b4b 100644
+--- a/node_modules/semantic-release/cli.js
++++ b/node_modules/semantic-release/cli.js
+@@ -22,6 +22,9 @@ Usage:
+     .option('b', {alias: 'branches', describe: 'Git branches to release from', ...stringList, group: 'Options'})
+     .option('r', {alias: 'repository-url', describe: 'Git repository URL', type: 'string', group: 'Options'})
+     .option('t', {alias: 'tag-format', describe: 'Git tag format', type: 'string', group: 'Options'})
++    .option('ta', {alias: 'tag-annotate', describe: 'Whether to make an unsigned, annotated tag', type: 'boolean', group: 'Options'})
++    .option('ts', {alias: 'tag-sign', describe: 'Whether to make GPG-signed tag', type: 'boolean', group: 'Options'})
++    .option('tm', {alias: 'tag-message', describe: 'Git tag message', type: 'string', group: 'Options'})
+     .option('p', {alias: 'plugins', describe: 'Plugins', ...stringList, group: 'Options'})
+     .option('e', {alias: 'extends', describe: 'Shareable configurations', ...stringList, group: 'Options'})
+     .option('ci', {describe: 'Toggle CI verifications', type: 'boolean', group: 'Options'})
+diff --git a/node_modules/semantic-release/index.js b/node_modules/semantic-release/index.js
+index 4d5aaed..50319fb 100644
+--- a/node_modules/semantic-release/index.js
++++ b/node_modules/semantic-release/index.js
+@@ -19,7 +19,7 @@ const getBranches = require('./lib/branches');
+ const getLogger = require('./lib/get-logger');
+ const {verifyAuth, isBranchUpToDate, getGitHead, tag, push, pushNotes, getTagHead, addNote} = require('./lib/git');
+ const getError = require('./lib/get-error');
+-const {COMMIT_NAME, COMMIT_EMAIL} = require('./lib/definitions/constants');
++const {COMMIT_NAME, COMMIT_EMAIL, TAG_MESSAGE_FORMAT} = require('./lib/definitions/constants');
+ 
+ marked.setOptions({renderer: new TerminalRenderer()});
+ 
+@@ -188,7 +188,13 @@ async function run(context, plugins) {
+     logger.warn(`Skip ${nextRelease.gitTag} tag creation in dry-run mode`);
+   } else {
+     // Create the tag before calling the publish plugins as some require the tag to exists
+-    await tag(nextRelease.gitTag, nextRelease.gitHead, {cwd, env});
++    await tag(
++      nextRelease.gitTag,
++      nextRelease.gitHead,
++      options.tagAnnotate,
++      options.tagSign,
++      template(options.tagMessage)({branch: context.branch.name, nextRelease}),
++      {cwd, env});
+     await addNote({channels: [nextRelease.channel]}, nextRelease.gitHead, {cwd, env});
+     await push(options.repositoryUrl, {cwd, env});
+     await pushNotes(options.repositoryUrl, {cwd, env});
+diff --git a/node_modules/semantic-release/lib/get-config.js b/node_modules/semantic-release/lib/get-config.js
+index 1f16962..4dda4fe 100644
+--- a/node_modules/semantic-release/lib/get-config.js
++++ b/node_modules/semantic-release/lib/get-config.js
+@@ -64,6 +64,9 @@ module.exports = async (context, cliOptions) => {
+     ],
+     repositoryUrl: (await pkgRepoUrl({normalize: false, cwd})) || (await repoUrl({cwd, env})),
+     tagFormat: `v\${version}`,
++    tagAnnotate: false,
++    tagSign: false,
++    tagMessage: `release \${nextRelease.version}`,
+     plugins: [
+       '@semantic-release/commit-analyzer',
+       '@semantic-release/release-notes-generator',
 diff --git a/node_modules/semantic-release/lib/git.js b/node_modules/semantic-release/lib/git.js
-index 8aaf884..53a610f 100644
+index 8aaf884..cab69c7 100644
 --- a/node_modules/semantic-release/lib/git.js
 +++ b/node_modules/semantic-release/lib/git.js
-@@ -221,7 +221,7 @@ async function verifyAuth(repositoryUrl, branch, execaOptions) {
+@@ -216,12 +216,25 @@ async function verifyAuth(repositoryUrl, branch, execaOptions) {
+  *
+  * @param {String} tagName The name of the tag.
+  * @param {String} ref The Git reference to tag.
++ * @param {Boolean} tagAnnotate Whether to make an unsigned, annotated tag.
++ * @param {Boolean} tagSign Whether to make GPG-signed tag.
++ * @param {String} tagMessage The tag message.
+  * @param {Object} [execaOpts] Options to pass to `execa`.
+  *
   * @throws {Error} if the tag creation failed.
   */
- async function tag(tagName, ref, execaOptions) {
+-async function tag(tagName, ref, execaOptions) {
 -  await execa('git', ['tag', tagName, ref], execaOptions);
-+  await execa('git', ['tag', tagName, ref, '-s', '-m', `release ${tagName}`], execaOptions);
++async function tag(tagName, ref, tagAnnotate, tagSign, tagMessage, execaOptions) {
++  const args = ['tag', tagName, ref];
++  if (tagAnnotate && !tagSign) {
++    args.push('-m');
++  }
++  if (tagSign && !tagAnnotate) {
++    args.push('-s');
++  }
++  if (tagAnnotate || tagSign) {
++    args.push(`-m ${tagMessage}`);
++  }
++  await execa('git', args, execaOptions);
  }
  
  /**
