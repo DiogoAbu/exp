@@ -13,9 +13,15 @@ index 9040236..4e43b4b 100644
      .option('e', {alias: 'extends', describe: 'Shareable configurations', ...stringList, group: 'Options'})
      .option('ci', {describe: 'Toggle CI verifications', type: 'boolean', group: 'Options'})
 diff --git a/node_modules/semantic-release/index.js b/node_modules/semantic-release/index.js
-index 4d5aaed..50319fb 100644
+index 4d5aaed..c2edf09 100644
 --- a/node_modules/semantic-release/index.js
 +++ b/node_modules/semantic-release/index.js
+@@ -1,4 +1,4 @@
+-const {pick} = require('lodash');
++const {template,pick} = require('lodash');
+ const marked = require('marked');
+ const TerminalRenderer = require('marked-terminal');
+ const envCi = require('env-ci');
 @@ -19,7 +19,7 @@ const getBranches = require('./lib/branches');
  const getLogger = require('./lib/get-logger');
  const {verifyAuth, isBranchUpToDate, getGitHead, tag, push, pushNotes, getTagHead, addNote} = require('./lib/git');
